@@ -38,3 +38,34 @@ func TestGenerateParseCommandLineParamsError(t *testing.T) {
 	}
 	t.Fatalf("process ran with err %v, want exit status 1", err)
 }
+
+func TestDeprecationParagraph(t *testing.T) {
+	tests := []struct {
+		name    string
+		leading string
+		want    []string
+	}{
+		{"empty", "", nil},
+		{"no notice", " Foo does things.\n", nil},
+		{"mid-sentence mention", " Foo is not\n Deprecated: really.\n", nil},
+		{"only notice", " Deprecated: Use Bar.\n", []string{"Deprecated: Use Bar."}},
+		{
+			"notice paragraph",
+			" Foo does things.\n\n Deprecated: Use Bar\n instead.\n\n More text.\n",
+			[]string{"Deprecated: Use Bar", "instead."},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := deprecationParagraph(tt.leading)
+			if len(got) != len(tt.want) {
+				t.Fatalf("deprecationParagraph(%q) = %q, want %q", tt.leading, got, tt.want)
+			}
+			for i := range got {
+				if got[i] != tt.want[i] {
+					t.Fatalf("deprecationParagraph(%q) = %q, want %q", tt.leading, got, tt.want)
+				}
+			}
+		})
+	}
+}

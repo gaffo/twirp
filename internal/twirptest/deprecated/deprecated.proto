@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+// Test that `option deprecated = true` on services and rpcs produces Go
+// "Deprecated:" doc comments in the generated code.
+package twirp.internal.twirptest.deprecated;
+option go_package = "/deprecated";
+
+message Req {}
+message Resp {}
+
+// OldService is replaced by NewService.
+service OldService {
+  option deprecated = true;
+
+  rpc Method(Req) returns (Resp);
+}
+
+service NewService {
+  // Old has a comment but no Deprecated paragraph of its own.
+  rpc Old(Req) returns (Resp) {
+    option deprecated = true;
+  }
+
+  rpc OldNoComment(Req) returns (Resp) {
+    option deprecated = true;
+  }
+
+  // OldWithNotice already explains its deprecation.
+  //
+  // Deprecated: Use Current instead.
+  rpc OldWithNotice(Req) returns (Resp) {
+    option deprecated = true;
+  }
+
+  // Current is not deprecated.
+  rpc Current(Req) returns (Resp);
+}

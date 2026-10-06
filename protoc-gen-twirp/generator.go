@@ -956,14 +956,16 @@ func (t *twirp) generateTwirpInterface(file *descriptor.FileDescriptorProto, ser
 	servName := serviceNameCamelCased(service)
 
 	comments, err := t.reg.ServiceComments(file, service)
-	if err == nil {
-		t.printComments(comments)
+	printed := err == nil && t.printComments(comments)
+	if isServiceDeprecated(service) && !hasDeprecationParagraph(comments.Leading) {
+		t.printDeprecationNotice(comments.Leading, printed)
 	}
 	t.P(`type `, servName, ` interface {`)
 	for _, method := range service.Method {
 		comments, err = t.reg.MethodComments(file, service, method)
-		if err == nil {
-			t.printComments(comments)
+		printed = err == nil && t.printComments(comments)
+		if isMethodDeprecated(method) && !hasDeprecationParagraph(comments.Leading) {
+			t.printDeprecationNotice(comments.Leading, printed)
 		}
 		t.P(t.generateSignature(method))
 		t.P()
@@ -998,6 +1000,9 @@ func (t *twirp) generateClient(name string, file *descriptor.FileDescriptorProto
 
 	t.P(`// `, newClientFunc, ` creates a `, name, ` client that implements the `, servName, ` interface.`)
 	t.P(`// It communicates using `, name, ` and can be configured with a custom HTTPClient.`)
+	if isServiceDeprecated(service) {
+		t.printDeprecationNotice(t.serviceLeadingComments(file, service), true)
+	}
 	t.P(`func `, newClientFunc, `(baseURL string, client HTTPClient, opts ...`, t.pkgs["twirp"], `.ClientOption) `, servName, ` {`)
 	t.P(`  if c, ok := client.(*`, t.pkgs["http"], `.Client); ok {`)
 	t.P(`    client = withoutRedirects(c)`)
@@ -1071,6 +1076,9 @@ func (t *twirp) generateClient(name string, file *descriptor.FileDescriptorProto
 		pkgName := pkgName(file)
 		inputType := t.goTypeName(method.GetInputType())
 		outputType := t.goTypeName(method.GetOutputType())
+		if isMethodDeprecated(method) {
+			t.printDeprecationNotice(t.methodLeadingComments(file, service, method), false)
+		}
 		t.P(`func (c *`, structName, `) `, methName, `(ctx `, t.pkgs["context"], `.Context, in *`, inputType, `) (*`, outputType, `, error) {`)
 		t.P(`  ctx = `, t.pkgs["ctxsetters"], `.WithPackageName(ctx, "`, pkgName, `")`)
 		t.P(`  ctx = `, t.pkgs["ctxsetters"], `.WithServiceName(ctx, "`, servName, `")`)
@@ -1144,6 +1152,9 @@ func (t *twirp) generateServer(file *descriptor.FileDescriptorProto, service *de
 	t.P(`// New`, servName, `Server builds a TwirpServer that can be used as an http.Handler to handle`)
 	t.P(`// HTTP requests that are routed to the right method in the provided svc implementation.`)
 	t.P(`// The opts are twirp.ServerOption modifiers, for example twirp.WithServerHooks(hooks).`)
+	if isServiceDeprecated(service) {
+		t.printDeprecationNotice(t.serviceLeadingComments(file, service), true)
+	}
 	t.P(`func New`, servName, `Server(svc `, servName, `, opts ...interface{}) TwirpServer {`)
 	t.P(`  serverOpts := newServerOpts(opts)`)
 	t.P()
@@ -1562,6 +1573,85 @@ func (t *twirp) printComments(comments typemap.DefinitionComments) bool {
 		t.P("// ", strings.TrimPrefix(line, " "))
 	}
 	return len(split) > 0
+}
+
+// deprecationNotice is the doc comment paragraph added to generated
+// identifiers whose proto definition sets `option deprecated = true`. The
+// wording matches protoc-gen-go, which uses it for deprecated messages, fields
+// and enums.
+const deprecationNotice = "Deprecated: Do not use."
+
+func isServiceDeprecated(service *descriptor.ServiceDescriptorProto) bool {
+	return service.GetOptions().GetDeprecated()
+}
+
+func isMethodDeprecated(method *descriptor.MethodDescriptorProto) bool {
+	return method.GetOptions().GetDeprecated()
+}
+
+func (t *twirp) serviceLeadingComments(file *descriptor.FileDescriptorProto, service *descriptor.ServiceDescriptorProto) string {
+	comments, err := t.reg.ServiceComments(file, service)
+	if err != nil {
+		return ""
+	}
+	return comments.Leading
+}
+
+func (t *twirp) methodLeadingComments(file *descriptor.FileDescriptorProto, service *descriptor.ServiceDescriptorProto, method *descriptor.MethodDescriptorProto) string {
+	comments, err := t.reg.MethodComments(file, service, method)
+	if err != nil {
+		return ""
+	}
+	return comments.Leading
+}
+
+// deprecationParagraph returns the lines of the first paragraph in a proto
+// leading comment that starts with "Deprecated:", following the Go doc comment
+// convention. It returns nil if there is no such paragraph.
+func deprecationParagraph(leading string) []string {
+	var para []string
+	inPara := false
+	atParaStart := true
+	for _, line := range strings.Split(strings.TrimSuffix(leading, "\n"), "\n") {
+		line = strings.TrimPrefix(line, " ")
+		if strings.TrimSpace(line) == "" {
+			if inPara {
+				return para
+			}
+			atParaStart = true
+			continue
+		}
+		if !inPara && atParaStart && strings.HasPrefix(line, "Deprecated:") {
+			inPara = true
+		}
+		if inPara {
+			para = append(para, line)
+		}
+		atParaStart = false
+	}
+	return para
+}
+
+func hasDeprecationParagraph(leading string) bool {
+	return deprecationParagraph(leading) != nil
+}
+
+// printDeprecationNotice writes a "Deprecated:" doc comment paragraph. If the
+// proto leading comment already contains one, that paragraph is reused so the
+// user's guidance (e.g. "Deprecated: Use Foo instead.") is preserved. Set
+// separate when other doc comment lines precede the notice, so it is printed
+// as its own paragraph.
+func (t *twirp) printDeprecationNotice(leading string, separate bool) {
+	para := deprecationParagraph(leading)
+	if para == nil {
+		para = []string{deprecationNotice}
+	}
+	if separate {
+		t.P("//")
+	}
+	for _, line := range para {
+		t.P("// ", line)
+	}
 }
 
 // Given a protobuf name for a Message, return the Go name we will use for that
