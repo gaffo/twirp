@@ -22,8 +22,8 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/twitchtv/twirp"
-	"github.com/twitchtv/twirp/clientcompat/internal/clientcompat"
+	"github.com/twitchtv/twirp/v9"
+	"github.com/twitchtv/twirp/v9/clientcompat/internal/clientcompat"
 )
 
 func main() {

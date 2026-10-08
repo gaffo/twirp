@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	pkgerrors "github.com/pkg/errors"
-	"github.com/twitchtv/twirp"
+	"github.com/twitchtv/twirp/v9"
 )
 
 func TestErrorConstructors(t *testing.T) {

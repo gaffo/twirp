@@ -31,9 +31,9 @@ import (
 	plugin "google.golang.org/protobuf/types/pluginpb"
 
 	"github.com/pkg/errors"
-	"github.com/twitchtv/twirp/internal/gen"
-	"github.com/twitchtv/twirp/internal/gen/stringutils"
-	"github.com/twitchtv/twirp/internal/gen/typemap"
+	"github.com/twitchtv/twirp/v9/internal/gen"
+	"github.com/twitchtv/twirp/v9/internal/gen/stringutils"
+	"github.com/twitchtv/twirp/v9/internal/gen/typemap"
 )
 
 type twirp struct {
@@ -294,8 +294,8 @@ func (t *twirp) generateImports(file *descriptor.FileDescriptorProto) {
 	// dependency imports
 	t.P(`import `, t.pkgs["protojson"], ` "google.golang.org/protobuf/encoding/protojson"`)
 	t.P(`import `, t.pkgs["proto"], ` "google.golang.org/protobuf/proto"`)
-	t.P(`import `, t.pkgs["twirp"], ` "github.com/twitchtv/twirp"`)
-	t.P(`import `, t.pkgs["ctxsetters"], ` "github.com/twitchtv/twirp/ctxsetters"`)
+	t.P(`import `, t.pkgs["twirp"], ` "github.com/twitchtv/twirp/v9"`)
+	t.P(`import `, t.pkgs["ctxsetters"], ` "github.com/twitchtv/twirp/v9/ctxsetters"`)
 	t.P()
 
 	// It's legal to import a message and use it as an input or output for a

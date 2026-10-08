@@ -15,8 +15,8 @@ import strings "strings"
 
 import protojson "google.golang.org/protobuf/encoding/protojson"
 import proto "google.golang.org/protobuf/proto"
-import twirp "github.com/twitchtv/twirp"
-import ctxsetters "github.com/twitchtv/twirp/ctxsetters"
+import twirp "github.com/twitchtv/twirp/v9"
+import ctxsetters "github.com/twitchtv/twirp/v9/ctxsetters"
 
 // Version compatibility assertion.
 // If the constant is not defined in the package, that likely means

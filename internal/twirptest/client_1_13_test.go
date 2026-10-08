@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/twitchtv/twirp"
+	"github.com/twitchtv/twirp/v9"
 )
 
 func TestClientContextCanceled(t *testing.T) {

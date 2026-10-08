@@ -20,7 +20,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	twirp "github.com/twitchtv/twirp"
+	twirp "github.com/twitchtv/twirp/v9"
 )
 
 type HaberdasherService struct{}

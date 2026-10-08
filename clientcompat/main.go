@@ -23,8 +23,8 @@ import (
 	"net/http/httptest"
 	"os"
 
-	"github.com/twitchtv/twirp"
-	"github.com/twitchtv/twirp/clientcompat/internal/clientcompat"
+	"github.com/twitchtv/twirp/v9"
+	"github.com/twitchtv/twirp/v9/clientcompat/internal/clientcompat"
 )
 
 var (

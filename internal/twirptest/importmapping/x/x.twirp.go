@@ -13,10 +13,10 @@ import strings "strings"
 
 import protojson "google.golang.org/protobuf/encoding/protojson"
 import proto "google.golang.org/protobuf/proto"
-import twirp "github.com/twitchtv/twirp"
-import ctxsetters "github.com/twitchtv/twirp/ctxsetters"
+import twirp "github.com/twitchtv/twirp/v9"
+import ctxsetters "github.com/twitchtv/twirp/v9/ctxsetters"
 
-import twirp_internal_twirptest_importmapping_y "github.com/twitchtv/twirp/internal/twirptest/importmapping/y"
+import twirp_internal_twirptest_importmapping_y "github.com/twitchtv/twirp/v9/internal/twirptest/importmapping/y"
 
 import bytes "bytes"
 import errors "errors"

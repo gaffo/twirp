@@ -19,7 +19,7 @@ import (
 	"os/exec"
 
 	"github.com/pkg/errors"
-	"github.com/twitchtv/twirp/clientcompat/internal/clientcompat"
+	"github.com/twitchtv/twirp/v9/clientcompat/internal/clientcompat"
 	"google.golang.org/protobuf/proto"
 )
 

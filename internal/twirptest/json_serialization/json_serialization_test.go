@@ -22,7 +22,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/twitchtv/twirp"
+	"github.com/twitchtv/twirp/v9"
 )
 
 type JSONSerializationService struct{}

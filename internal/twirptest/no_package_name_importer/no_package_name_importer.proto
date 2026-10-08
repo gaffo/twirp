@@ -4,7 +4,7 @@ syntax = "proto3";
 
 import "no_package_name/no_package_name.proto"; // import is relative to protoc's option --proto_path
 
-option go_package = "github.com/twitchtv/twirp/internal/twirptest/no_package_name_importer";
+option go_package = "github.com/twitchtv/twirp/v9/internal/twirptest/no_package_name_importer";
 
 service Svc2 {
   rpc Method(Msg) returns (Msg);
